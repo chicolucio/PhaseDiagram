@@ -40,91 +40,67 @@ def state_index(state):
         print('Invalid state')
 
 
-@ureg.wraps('gram/cm**3', [None, None])
-def density_value(compound, state):
+def density_table(compound):
     compound_idx = compound_index(compound)
+    try:
+        return d['density'].loc[(d['density']['id'] == compound_idx)]
+    except IndexError:
+        print('Invalid state or compound')
+
+@ureg.wraps('gram/cm**3', [None, None, None])
+def density(compound, state, value_index=0):
+    table = density_table(compound)
     state_idx = state_index(state)
     try:
-        return list(d['density'].loc[((d['density']['state'] == state_idx) & (d['density']['id'] == compound_idx)),
-                                     'value'])[0]
+        return list(table.loc[(table['state'] == state_idx), 'value'])[value_index]
     except IndexError:
         print('Invalid state or compound')
 
 
-def antoine(compound):
+def antoine_table(compound):
     compound_idx = compound_index(compound)
     try:
-        return list(d['antoine'].loc[(d['antoine']['id'] == compound_idx),
-                                     ['t_min', 't_max', 'A', 'B', 'C']].itertuples(index=False, name=None))[0]
+        return d['antoine'].loc[(d['antoine']['id'] == compound_idx)]
+    except IndexError:
+        print('Invalid state or compound')
+
+
+def antoine(compound, value_index=0):
+    table = antoine_table(compound)
+    try:
+        return list(table.loc[:, ['t_min', 't_max', 'A', 'B', 'C']].itertuples(index=False, name=None))[value_index]
     except IndexError:
         print('Invalid compound')
 
 
-@ureg.wraps('kelvin', [None])
-def boiling_point(compound):
+def point_table(compound, point_name):
     compound_idx = compound_index(compound)
     try:
-        return list(d['boiling_point'].loc[(d['boiling_point']['id'] == compound_idx),
-                                           'temperature'])[0]
-    except IndexError:
-        print('Invalid compound')
+        return d[point_name].loc[d[point_name]['id'] == compound_idx]
+    except KeyError:
+        print('Invalid point name')
 
 
-@ureg.wraps('kelvin', [None])
-def melting_point(compound):
+@ureg.wraps(('kelvin', 'pascal'), [None, None, None])
+def point(compound, point_name, value_index=0):
+    table = point_table(compound, point_name)
+    return list(table.loc[:, ['temperature', 'pressure']].itertuples(index=False, name=None))[value_index]
+
+
+def enthalpy_table(compound, enthalpy_name):
     compound_idx = compound_index(compound)
+    name_dict = {'fusion': 'h_melt',
+                 'sublimation': 'h_sub',
+                 'vaporization': 'h_vap_boil'}
     try:
-        return list(d['melting_point'].loc[(d['melting_point']['id'] == compound_idx),
-                                           'temperature'])[0]
-    except IndexError:
-        print('Invalid compound')
+        return d[name_dict[enthalpy_name]].loc[d[name_dict[enthalpy_name]]['id'] == compound_idx]
+    except KeyError:
+        print('Invalid enthalpy name')
 
-
-@ureg.wraps(('kelvin', 'pascal'), [None])
-def triple_point(compound):
-    compound_idx = compound_index(compound)
-    try:
-        return list(d['triple_point'].loc[d['triple_point']['id'] == compound_idx,
-                                           ['temperature', 'pressure']].itertuples(index=False, name=None))[0]
-    except IndexError:
-        print('Invalid compound')
-
-
-@ureg.wraps(('kelvin', 'pascal'), [None])
-def critical_point(compound):
-    compound_idx = compound_index(compound)
-    try:
-        return list(d['critical_point'].loc[d['critical_point']['id'] == compound_idx,
-                                            ['temperature', 'pressure']].itertuples(index=False, name=None))[0]
-    except IndexError:
-        print('Invalid compound')
-
-
-@ureg.wraps('kJ/mole', [None])
-def enthalpy_fusion(compound):
-    compound_idx = compound_index(compound)
-    try:
-        return list(d['h_melt'].loc[(d['h_melt']['id'] == compound_idx), 'value'])[0]
-    except IndexError:
-        print('Invalid compound')
-
-
-@ureg.wraps('kJ/mole', [None])
-def enthalpy_sublimation(compound):
-    compound_idx = compound_index(compound)
-    try:
-        return list(d['h_sub'].loc[(d['h_sub']['id'] == compound_idx), 'value'])[0]
-    except IndexError:
-        print('Invalid compound')
-
-
-@ureg.wraps('kJ/mole', [None])
-def enthalpy_vaporization(compound):
-    compound_idx = compound_index(compound)
-    try:
-        return list(d['h_vap_boil'].loc[(d['h_vap_boil']['id'] == compound_idx), 'value'])[0]
-    except IndexError:
-        print('Invalid compound')
+@ureg.wraps('kJ/mole', [None, None, None])
+def enthalpy(compound, enthalpy_name, value_index=0):
+    table = enthalpy_table(compound, enthalpy_name)
+    return list(table.loc[:, 'value'])[value_index]
 
 
 @ureg.wraps('(cm**3)/mole', [None])
@@ -140,14 +116,14 @@ class Data:
     def __init__(self, compound):
         self.compound = compound
         self.idx = compound_index(self.compound)
-        self.density_solid = density_value(self.compound, 'solid')
-        self.density_liquid = density_value(self.compound, 'liquid')
+        self.density_solid = density(self.compound, 'solid')
+        self.density_liquid = density(self.compound, 'liquid')
         self.antoine = antoine(self.compound)
-        self.boiling_point = boiling_point(self.compound)
-        self.melting_point = melting_point(self.compound)
-        self.triple_point = triple_point(self.compound)
-        self.critical_point = critical_point(self.compound)
-        self.enthalpy_fusion = enthalpy_fusion(self.compound)
-        self.enthalpy_sublimation = enthalpy_sublimation(self.compound)
-        self.enthalpy_vaporization = enthalpy_vaporization(self.compound)
+        self.boiling_point = point(self.compound, 'boiling_point')
+        self.melting_point = point(self.compound, 'melting_point')
+        self.triple_point = point(self.compound, 'triple_point')
+        self.critical_point = point(self.compound, 'critical_point')
+        self.enthalpy_fusion = enthalpy(self.compound, 'fusion')
+        self.enthalpy_sublimation = enthalpy(self.compound, 'sublimation')
+        self.enthalpy_vaporization = enthalpy(self.compound, 'vaporization')
         self.volume_change_fusion = volume_change_fusion(self.compound)
