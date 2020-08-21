@@ -1,11 +1,14 @@
-from core.core import Data, state_index, compound_index
+from core.core import PhaseDiagram, state_index, compound_index
 import pint
 
 
 def test_water():
-    water_data = Data('water')
-    assert isinstance(water_data, Data)
+    water_data = PhaseDiagram('water')
+    assert isinstance(water_data, PhaseDiagram)
     assert water_data.idx == 1
+    assert water_data.cas == '7732-18-5'
+    assert water_data.formula == 'H2O'
+    assert water_data.molar_mass == pint.Quantity(18.0153, 'gram/mole')
     assert isinstance(water_data.density_solid, pint.Quantity)
     assert water_data.density_solid == pint.Quantity(0.9167, 'gram/cm**3')
     assert water_data.density_liquid == pint.Quantity(0.9970474, 'gram/cm**3')
