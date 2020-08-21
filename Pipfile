@@ -8,10 +8,13 @@ pytest = "*"
 flake8 = "*"
 rope = "*"
 pytest-cov = "*"
+ipykernel = "*"
 
 [packages]
 pandas = "*"
 pint = "*"
+scipy = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.8"
