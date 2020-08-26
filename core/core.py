@@ -5,6 +5,7 @@ from scipy import constants
 from . import ureg, Q_
 import re
 import matplotlib.pyplot as plt
+from collections import namedtuple
 
 DB = 'data/data.db'
 
@@ -84,7 +85,10 @@ def antoine_table(compound):
 def antoine(compound, value_index=0):
     table = antoine_table(compound)
     try:
-        return list(table.loc[:, ['t_min', 't_max', 'A', 'B', 'C']].itertuples(index=False, name=None))[value_index]
+        antoine_tuple = list(table.loc[:, ['t_min', 't_max', 'A', 'B', 'C']].itertuples(index=False,
+                                                                                        name=None))[value_index]
+        Antoine = namedtuple("antoine", ["Tmin", "Tmax", "A", "B", "C"])
+        return Antoine(*antoine_tuple)
     except IndexError:
         print('Invalid compound')
 
