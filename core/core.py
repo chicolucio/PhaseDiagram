@@ -42,6 +42,12 @@ def compound_identification(compound):
     return list(d['compounds'].loc[(d['compounds']['id'] == compound_idx)].itertuples(index=False, name=None))[0]
 
 
+def compound_names(compound):
+    compound_idx = compound_index(compound)
+    return list(d['names'].loc[(d['names']['id'] == compound_idx),
+                               ['name', 'name_alt1', 'name_alt2', 'name_alt3']].itertuples(index=False, name=None))
+
+
 def state_index(state):
     try:
         return d['phys_states'].loc[d['phys_states']['state'] == state, 'id'].item()
@@ -140,6 +146,8 @@ class PhaseDiagram:
         self.cas = compound_identification(self.compound)[1]
         self.formula = compound_identification(self.compound)[2]
         self.molar_mass = compound_identification(self.compound)[3] * ureg('gram/mole')
+        self.name = compound_names(self.compound)[0][0]
+        self.alternative_names = compound_names(self.compound)[0][1:]
         self.density_solid = density(self.compound, 'solid')
         self.density_liquid = density(self.compound, 'liquid')
         self.antoine = antoine(self.compound)
