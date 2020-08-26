@@ -104,7 +104,9 @@ def point_table(compound, point_name):
 @ureg.wraps(('kelvin', 'pascal'), [None, None, None])
 def point(compound, point_name, value_index=0):
     table = point_table(compound, point_name)
-    return list(table.loc[:, ['temperature', 'pressure']].itertuples(index=False, name=None))[value_index]
+    Point = namedtuple("point", ["temperature", "pressure"])
+    point_tuple = list(table.loc[:, ['temperature', 'pressure']].itertuples(index=False, name=None))[value_index]
+    return Point(*point_tuple)
 
 
 def enthalpy_table(compound, enthalpy_name):
