@@ -233,6 +233,16 @@ class PhaseDiagram:
         P_arr = self.triple_point[1] * np.exp(cte * (1/self.triple_point[0] - 1/T_arr))
         return T_arr, P_arr
 
+    @property
+    def antoine_si(self):
+        Tmin = self.antoine.Tmin + 273.15
+        Tmax = self.antoine.Tmax + 273.15
+        A = self.antoine.A + np.log10(101325/760)
+        B = self.antoine.B
+        C = self.antoine.C - 273.15
+        Antoine = namedtuple("antoine_si", ["Tmin", "Tmax", "A", "B", "C"])
+        return Antoine(Tmin, Tmax, A, B, C)
+
     def antoine_lv(self):
         """Antoine liquid-vapor line data
 
@@ -246,17 +256,13 @@ class PhaseDiagram:
         T_arr = np.linspace(self.triple_point[0].magnitude,
                             self.critical_point[0].magnitude, 100) * ureg.K
 
-        A = self.antoine[2] + np.log10(101325/760)
-        B = self.antoine[3]
-        C = self.antoine[4] - 273.15
-        Tmin = self.antoine[0] + 273.15
-        Tmax = self.antoine[1] + 273.15
+        Tmin, Tmax, A, B, C = self.antoine_si
 
         right_side = A - (B / (C + T_arr.magnitude))
 
         P_arr = 10**right_side * ureg.Pa
 
-        return T_arr, P_arr, A, B, C, Tmin, Tmax
+        return T_arr, P_arr
 
     def format_formula(self):
         """ Display chemical formulas in a proper way
@@ -366,7 +372,7 @@ class PhaseDiagram:
                     'g--', label='LV boundary', linewidth=linewidth)
 
         if parts[3] == 1:
-            T_antoine_lv, P_antoine_lv, *_ = self.antoine_lv()
+            T_antoine_lv, P_antoine_lv = self.antoine_lv()
             ax.plot(T_antoine_lv.to(T_unit),
                     P_antoine_lv.to(P_unit),
                     'r-', label='LV boundary - Antoine', linewidth=linewidth)
