@@ -169,12 +169,10 @@ class PhaseDiagram:
 
     def clapeyron_sl(self, temp_range=5):
         """Clausius-Clapeyron solid-liquid line data
-
         Parameters
         ----------
         temp_range : int, optional
             Temperature range around the triple point, by default 5
-
         Returns
         -------
         tuple
@@ -195,12 +193,10 @@ class PhaseDiagram:
 
     def clapeyron_sv(self, temp_range=60):
         """Clausius-Clapeyron solid-vapor line data
-
         Parameters
         ----------
         temp_range : int, optional
             Temperature range around the triple point, by default 60
-
         Returns
         -------
         tuple
@@ -216,7 +212,6 @@ class PhaseDiagram:
 
     def clapeyron_lv(self):
         """Clausius-Clapeyron liquid-vapor line data
-
         Returns
         -------
         tuple
@@ -245,7 +240,6 @@ class PhaseDiagram:
 
     def antoine_lv(self):
         """Antoine liquid-vapor line data
-
         Returns
         -------
         tuple
@@ -266,7 +260,6 @@ class PhaseDiagram:
 
     def format_formula(self):
         """ Display chemical formulas in a proper way
-
         Returns
         -------
         string
@@ -278,7 +271,6 @@ class PhaseDiagram:
 
     def _plot_params(self, ax=None):
         """Internal function for plot parameters.
-
         Parameters
         ----------
         ax : Matplotlib axes, optional
@@ -308,7 +300,6 @@ class PhaseDiagram:
              P_unit='Pa', scale_log=True, legend=False, title=True,
              title_text=''):
         """Plot function
-
         Parameters
         ----------
         parts : tuple, optional
@@ -335,7 +326,6 @@ class PhaseDiagram:
             If the plot will have a title, by default True
         title_text : str, optional
             Title text, by default ''
-
         Returns
         -------
         Matplotlib axes
