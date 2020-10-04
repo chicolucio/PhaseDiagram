@@ -44,8 +44,6 @@ def test_carbon_dioxide():
     assert carbon_dioxide_data.enthalpy_fusion == pint.Quantity(9.02, 'kJ/mole')
     assert carbon_dioxide_data.enthalpy_sublimation == pint.Quantity(25.2, 'kJ/mole')
     assert carbon_dioxide_data.enthalpy_vaporization == pint.Quantity(15.8, 'kJ/mole')
-    assert carbon_dioxide_data.volume_change_fusion == pint.Quantity(-1.672, 'cm**3/mole')
-
 
 def test_state_index():
     assert state_index('solid') == 1
