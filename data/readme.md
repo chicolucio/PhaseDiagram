@@ -22,7 +22,7 @@ This project uses a database containing 16 tables, which are:
 | 'triple_point'   | Parameters for the triple point                         |
 | 'v_melt'         | Volume change on fusion                                 |
 
-**Note:** All tables have an `id` column that refers to the compound index. The only exceptions are the `references` and` phys_states` tables, since their indexes refer, respectively, to each reference placed in this database and to the physical states of the compounds.
+**Note:** All tables have an `id` column that refers to the compound index. The only exceptions are the `references` and `phys_states` tables, since their indexes refer, respectively, to each reference placed in this database and to the physical states of the compounds.
 
 Below is an image of how the interaction between tables works.
 
@@ -31,36 +31,35 @@ Below is an image of how the interaction between tables works.
 ## Units used:
 We use the following units for physical and chemical quantities in the database
 
-| Quantity         | Unit                              |
-| ---------------- | --------------------------------- |
-| Pressure         | pascal (Pa)                       |
-| Temperature      | kelvin (K)                        |
-| Molar mass       | gram per mol (g/mol)              |
-| Enthalpy         | kilojoule per mol (kJ/mol)        |
-| Entropy          | kilojoule per kelvin (kJ/K)       |
-| Volume           | cubic centimeter (cm³)            |
+| Quantity         | Unit                                        |
+| ---------------- | ------------------------------------------- |
+| Pressure         | pascal $ (Pa) $                             |
+| Temperature      | kelvin $ (K) $                              |
+| Molar mass       | gram per mol $ (g \cdot mol⁻¹) $            |
+| Enthalpy         | kilojoule per mol $ (kJ \cdot mol⁻¹) $      |
+| Entropy          | kilojoule per kelvin $ (kJ \cdot K⁻¹) $     |
+| Volume           | cubic centimeter $ (cm³) $                  |
 
 In the code, for clarity and for quantities not shown in the database, below is a table with the units used for specific quantities.
 
-| Name                    | Meaning                                     | Unit           |
-| ----------------------- | ------------------------------------------- | -------------- |
-| 'gas_constants'         | gas constant                                | J/mol * K      |
-| 'molar_mass'            | molar mass of the compound                  | gram/mol       |
-| 'density_solid'         | density of the compound in the solid state  | gram/cm**3     |
-| 'density_solid'         | density of the compound in the liquid state | gram/cm**3     |
-| 'antoine'               | Antoine parameter A, B and C                | diomensionless |
-| 'boiling_point'         | boiling point value                         | Pa, K          |
-| 'melting_point'         | melting point value                         | Pa, K          |
-| 'triple_point'          | triple point value                          | Pa, K          |
-| 'critical_point'        | critical point value                        | Pa, K          |
-| 'enthalpy_fusion'       | melting enthalpy value                      | kJ/mol         |
-| 'enthalpy_sublimation'  | sublimation enthalpy value                  | kJ/mol         |
-| 'enthalpy_vaporization' | vaporization enthalpy value                 | kJ/mol         |
-| 'volume_change_fusion   | melting volume                              | cm**3/mol      |
+| Name                    | Meaning                                     | Unit                          |
+| ----------------------- | ------------------------------------------- | ----------------------------- |
+| 'gas_constants'         | gas constant                                | $$ J \cdot mol⁻¹ \cdot K⁻1} $$|
+| 'molar_mass'            | molar mass of the compound                  | $$ gram \cdot mol⁻¹ $$        |
+| 'density_solid'         | density of the compound in the solid state  | $$ gram \cdot cm⁻³ $$         |
+| 'density_solid'         | density of the compound in the liquid state | $$ gram \cdot cm⁻³ $$         |
+| 'antoine'               | Antoine parameter A, B and C                | $$ diomensionless $$          |
+| 'boiling_point'         | boiling point value                         | $$ Pa, K $$                   |
+| 'melting_point'         | melting point value                         | $$ Pa, K $$                   |
+| 'triple_point'          | triple point value                          | $$ Pa, K $$                   |
+| 'critical_point'        | critical point value                        | $$ Pa, K $$                   |
+| 'enthalpy_fusion'       | melting enthalpy value                      | $$ kJ \cdot mol⁻¹ $$          |
+| 'enthalpy_sublimation'  | sublimation enthalpy value                  | $$ kJ \cdot mol⁻¹ $$          |
+| 'enthalpy_vaporization' | vaporization enthalpy value                 | $$ kJ \cdot mol⁻¹ $$          |
+| 'volume_change_fusion   | melting volume                              | $$ cm³ \cdot mol⁻¹ $$         |
 
 ## Other functions
-
-The code also has functions without units, which serve to know other information about the compounds.
+ The code also has functions without units, which serve to know other information about the compounds.
 
 | Name              | Meaning                                  |
 | ----------------- | ---------------------------------------- |
