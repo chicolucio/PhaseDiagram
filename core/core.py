@@ -40,12 +40,18 @@ def compound_index(compound):
 
 def compound_identification(compound):
     compound_idx = compound_index(compound)
-    return list(d['compounds'].loc[(d['compounds']['id'] == compound_idx)].itertuples(index=False, name=None))[0]
+    compound_ident_tuple = list(d['compounds'].loc[(d['compounds']['id'] == compound_idx)].itertuples(index=False,
+                                                                                                      name=None))[0]
+    Identification = namedtuple("comp_id", ["index", "cas", "formula", "molar_mass", "name_ref"])
+    return Identification(*compound_ident_tuple)
 
 
 def compound_names(compound):
     compound_idx = compound_index(compound)
-    return list(d['names'].loc[(d['names']['id'] == compound_idx)].itertuples(index=False, name=None))[0]
+    compound_names_tuple = list(d['names'].loc[(d['names']['id'] == compound_idx)].itertuples(index=False,
+                                                                                              name=None))[0]
+    Names = namedtuple("names", ["index", "name", "alt_name1", "alt_name2", "alt_name3"])
+    return Names(*compound_names_tuple)
 
 
 def state_index(state):
@@ -148,11 +154,13 @@ class PhaseDiagram:
     def __init__(self, compound):
         self.compound = compound
         self.idx = compound_index(self.compound)
-        self.cas = compound_identification(self.compound)[1]
-        self.formula = compound_identification(self.compound)[2]
-        self.molar_mass = compound_identification(self.compound)[3] * ureg('gram/mole')
-        self.name = compound_names(self.compound)[1]
-        self.alternative_names = compound_names(self.compound)[2:]
+        self.cas = compound_identification(self.compound).cas
+        self.formula = compound_identification(self.compound).formula
+        self.molar_mass = compound_identification(self.compound).molar_mass * ureg('gram/mole')
+        self.name = compound_names(self.compound).name
+        self.alternative_names = (compound_names(self.compound).alt_name1,
+                                  compound_names(self.compound).alt_name2,
+                                  compound_names(self.compound).alt_name3)
         self.density_solid = density(self.compound, 'solid')
         self.density_liquid = density(self.compound, 'liquid')
         self.antoine = antoine(self.compound)
