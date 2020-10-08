@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 import numpy as np
 from scipy import constants
-from . import ureg, Q_
+from . import ureg
 import re
 import matplotlib.pyplot as plt
 from collections import namedtuple
@@ -40,13 +40,18 @@ def compound_index(compound):
 
 def compound_identification(compound):
     compound_idx = compound_index(compound)
-    return list(d['compounds'].loc[(d['compounds']['id'] == compound_idx)].itertuples(index=False, name=None))[0]
+    compound_ident_tuple = list(d['compounds'].loc[(d['compounds']['id'] == compound_idx)].itertuples(index=False,
+                                                                                                      name=None))[0]
+    Identification = namedtuple("comp_id", ["index", "cas", "formula", "molar_mass", "name_ref"])
+    return Identification(*compound_ident_tuple)
 
 
 def compound_names(compound):
     compound_idx = compound_index(compound)
-    return list(d['names'].loc[(d['names']['id'] == compound_idx),
-                               ['name', 'name_alt1', 'name_alt2', 'name_alt3']].itertuples(index=False, name=None))
+    compound_names_tuple = list(d['names'].loc[(d['names']['id'] == compound_idx)].itertuples(index=False,
+                                                                                              name=None))[0]
+    Names = namedtuple("names", ["index", "name", "alt_name1", "alt_name2", "alt_name3"])
+    return Names(*compound_names_tuple)
 
 
 def state_index(state):
@@ -132,13 +137,13 @@ def volume_change_fusion_calc(density_liquid, density_solid, molar_mass):
 
 
 @ureg.wraps('(cm**3)/mole', [None, None, None, None])
-def volume_change_fusion(compound, value_index=0, calc=True, calc_values_index=[0, 0]):
+def volume_change_fusion(compound, value_index=0, calc=True, calc_values_index=(0, 0)):
     compound_idx = compound_index(compound)
     if calc:
         d_sol = density(compound, 'solid', calc_values_index[0])
         d_liq = density(compound, 'liquid', calc_values_index[1])
-        MM = compound_identification(compound)[3] * ureg('gram/mole')
-        return volume_change_fusion_calc(d_liq, d_sol, MM)
+        molar_mass = compound_identification(compound)[3] * ureg('gram/mole')
+        return volume_change_fusion_calc(d_liq, d_sol, molar_mass)
     try:
         return list(d['v_melt'].loc[(d['v_melt']['id'] == compound_idx), 'value'])[value_index]
     except IndexError:
@@ -149,11 +154,13 @@ class PhaseDiagram:
     def __init__(self, compound):
         self.compound = compound
         self.idx = compound_index(self.compound)
-        self.cas = compound_identification(self.compound)[1]
-        self.formula = compound_identification(self.compound)[2]
-        self.molar_mass = compound_identification(self.compound)[3] * ureg('gram/mole')
-        self.name = compound_names(self.compound)[0][0]
-        self.alternative_names = compound_names(self.compound)[0][1:]
+        self.cas = compound_identification(self.compound).cas
+        self.formula = compound_identification(self.compound).formula
+        self.molar_mass = compound_identification(self.compound).molar_mass * ureg('gram/mole')
+        self.name = compound_names(self.compound).name
+        self.alternative_names = (compound_names(self.compound).alt_name1,
+                                  compound_names(self.compound).alt_name2,
+                                  compound_names(self.compound).alt_name3)
         self.density_solid = density(self.compound, 'solid')
         self.density_liquid = density(self.compound, 'liquid')
         self.antoine = antoine(self.compound)
@@ -169,12 +176,10 @@ class PhaseDiagram:
 
     def clapeyron_sl(self, temp_range=5):
         """Clausius-Clapeyron solid-liquid line data
-
         Parameters
         ----------
         temp_range : int, optional
             Temperature range around the triple point, by default 5
-
         Returns
         -------
         tuple
@@ -195,12 +200,10 @@ class PhaseDiagram:
 
     def clapeyron_sv(self, temp_range=60):
         """Clausius-Clapeyron solid-vapor line data
-
         Parameters
         ----------
         temp_range : int, optional
             Temperature range around the triple point, by default 60
-
         Returns
         -------
         tuple
@@ -216,7 +219,6 @@ class PhaseDiagram:
 
     def clapeyron_lv(self):
         """Clausius-Clapeyron liquid-vapor line data
-
         Returns
         -------
         tuple
@@ -245,7 +247,6 @@ class PhaseDiagram:
 
     def antoine_lv(self):
         """Antoine liquid-vapor line data
-
         Returns
         -------
         tuple
@@ -266,19 +267,17 @@ class PhaseDiagram:
 
     def format_formula(self):
         """ Display chemical formulas in a proper way
-
         Returns
         -------
         string
             LaTeX code to display chemical formulas in a proper way
         """
         label_formula = re.sub("([0-9])", "_\\1", self.formula)
-        label_formula = '$\mathregular{'+label_formula+'}$'
+        label_formula = r'$\mathregular{'+label_formula+'}$'
         return label_formula
 
     def _plot_params(self, ax=None):
         """Internal function for plot parameters.
-
         Parameters
         ----------
         ax : Matplotlib axes, optional
@@ -308,7 +307,6 @@ class PhaseDiagram:
              P_unit='Pa', scale_log=True, legend=False, title=True,
              title_text=''):
         """Plot function
-
         Parameters
         ----------
         parts : tuple, optional
@@ -335,7 +333,6 @@ class PhaseDiagram:
             If the plot will have a title, by default True
         title_text : str, optional
             Title text, by default ''
-
         Returns
         -------
         Matplotlib axes
