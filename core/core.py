@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 import numpy as np
 from scipy import constants
-from . import ureg, Q_
+from . import ureg
 import re
 import matplotlib.pyplot as plt
 from collections import namedtuple
@@ -131,13 +131,13 @@ def volume_change_fusion_calc(density_liquid, density_solid, molar_mass):
 
 
 @ureg.wraps('(cm**3)/mole', [None, None, None, None])
-def volume_change_fusion(compound, value_index=0, calc=True, calc_values_index=[0, 0]):
+def volume_change_fusion(compound, value_index=0, calc=True, calc_values_index=(0, 0)):
     compound_idx = compound_index(compound)
     if calc:
         d_sol = density(compound, 'solid', calc_values_index[0])
         d_liq = density(compound, 'liquid', calc_values_index[1])
-        MM = compound_identification(compound)[3] * ureg('gram/mole')
-        return volume_change_fusion_calc(d_liq, d_sol, MM)
+        molar_mass = compound_identification(compound)[3] * ureg('gram/mole')
+        return volume_change_fusion_calc(d_liq, d_sol, molar_mass)
     try:
         return list(d['v_melt'].loc[(d['v_melt']['id'] == compound_idx), 'value'])[value_index]
     except IndexError:
@@ -265,7 +265,7 @@ class PhaseDiagram:
             LaTeX code to display chemical formulas in a proper way
         """
         label_formula = re.sub("([0-9])", "_\\1", self.formula)
-        label_formula = '$\mathregular{'+label_formula+'}$'
+        label_formula = r'$\mathregular{'+label_formula+'}$'
         return label_formula
 
     def _plot_params(self, ax=None):
