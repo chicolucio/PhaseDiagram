@@ -64,6 +64,16 @@ def test_carbon_dioxide():
     assert carbon_dioxide_data.enthalpy_sublimation == pint.Quantity(25.2, 'kJ/mole')
     assert carbon_dioxide_data.enthalpy_vaporization == pint.Quantity(15.8, 'kJ/mole')
 
+
+def test_carbon_dioxide_alt_name():
+    carbon_dioxide_data = PhaseDiagram('carbonic anhydride')
+    assert isinstance(carbon_dioxide_data, PhaseDiagram)
+    assert carbon_dioxide_data.idx == 2
+    assert carbon_dioxide_data.name == 'carbon dioxide'
+    assert carbon_dioxide_data.cas == '124-38-9'
+    assert carbon_dioxide_data.formula == 'CO2'
+
+
 def test_state_index():
     assert state_index('solid') == 1
     assert state_index('liquid') == 2
