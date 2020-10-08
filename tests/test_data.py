@@ -24,6 +24,25 @@ def test_water():
     assert water_data.enthalpy_vaporization == pint.Quantity(40.66, 'kJ/mole')
     assert water_data.volume_change_fusion == pint.Quantity(-1.634, 'cm**3/mole')
 
+
+def test_water_cas():
+    water_data = PhaseDiagram('7732-18-5')
+    assert isinstance(water_data, PhaseDiagram)
+    assert water_data.idx == 1
+    assert water_data.name == 'water'
+    assert water_data.cas == '7732-18-5'
+    assert water_data.formula == 'H2O'
+
+
+def test_water_formula():
+    water_data = PhaseDiagram('H2O')
+    assert isinstance(water_data, PhaseDiagram)
+    assert water_data.idx == 1
+    assert water_data.name == 'water'
+    assert water_data.cas == '7732-18-5'
+    assert water_data.formula == 'H2O'
+
+
 def test_carbon_dioxide():
     carbon_dioxide_data = PhaseDiagram('carbon dioxide')
     assert isinstance(carbon_dioxide_data, PhaseDiagram)
