@@ -174,6 +174,12 @@ class PhaseDiagram:
         self.volume_change_fusion = volume_change_fusion(self.compound)
         self.density_table = density_table(self.compound)
 
+    def __repr__(self):
+        return f'{self.__class__.__name__}(name= {self.name}, CAS= {self.cas}, formula= {self.formula})'
+
+    def __str__(self):
+        return f'Phase diagram data for compound {self.name}, CAS {self.cas}, formula {self.formula}'
+
     def clapeyron_sl(self, temp_range=5):
         """Clausius-Clapeyron solid-liquid line data
         Parameters
