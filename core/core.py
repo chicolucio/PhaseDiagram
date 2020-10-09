@@ -107,11 +107,15 @@ def point_table(compound, point_name):
 
 
 @ureg.wraps(('kelvin', 'pascal'), [None, None, None])
-def point(compound, point_name, value_index=0):
+def _point(compound, point_name, value_index=0):
     table = point_table(compound, point_name)
+    return list(table.loc[:, ['temperature', 'pressure']].itertuples(index=False, name=None))[value_index]
+
+
+def point(compound, point_name, value_index=0):
+    point_with_units = _point(compound, point_name, value_index)
     Point = namedtuple("point", ["temperature", "pressure"])
-    point_tuple = list(table.loc[:, ['temperature', 'pressure']].itertuples(index=False, name=None))[value_index]
-    return Point(*point_tuple)
+    return Point(*point_with_units)
 
 
 def enthalpy_table(compound, enthalpy_name):
@@ -191,11 +195,11 @@ class PhaseDiagram:
         if V_melt > 0:
             temp_range = -temp_range
 
-        T_arr = np.linspace(self.triple_point[0].magnitude,
-                            self.triple_point[0].magnitude-temp_range,
+        T_arr = np.linspace(self.triple_point.temperature.magnitude,
+                            self.triple_point.temperature.magnitude-temp_range,
                             100) * ureg.kelvin
         cte = self.enthalpy_fusion / V_melt
-        P_arr = self.triple_point[1] + cte * np.log(T_arr / self.triple_point[0])
+        P_arr = self.triple_point.pressure + cte * np.log(T_arr / self.triple_point.temperature)
         return T_arr, P_arr
 
     def clapeyron_sv(self, temp_range=60):
@@ -210,11 +214,11 @@ class PhaseDiagram:
             Tuple of arrays (temperature, pressure)
         """
         # P(T) = P' exp[ (H_sub / R) (1 / T' - 1 / T) ] where T' is triple_point[0]
-        T_arr = np.linspace(self.triple_point[0].magnitude - temp_range,
-                            self.triple_point[0].magnitude,
+        T_arr = np.linspace(self.triple_point.temperature.magnitude - temp_range,
+                            self.triple_point.temperature.magnitude,
                             100) * ureg.K
         cte = self.enthalpy_sublimation / gas_constant
-        P_arr = self.triple_point[1] * np.exp(cte * (1/self.triple_point[0] - 1/T_arr))
+        P_arr = self.triple_point.pressure * np.exp(cte * (1/self.triple_point.temperature - 1/T_arr))
         return T_arr, P_arr
 
     def clapeyron_lv(self):
@@ -225,14 +229,14 @@ class PhaseDiagram:
             Tuple of arrays (temperature, pressure)
         """
         # P(T) = P' exp[ (H_vap / R) (1 / T' - 1 / T) ] where T' is TP_temperature
-        T_arr = np.linspace(self.triple_point[0].magnitude,
-                            self.critical_point[0].magnitude,
+        T_arr = np.linspace(self.triple_point.temperature.magnitude,
+                            self.critical_point.temperature.magnitude,
                             100) * ureg.kelvin
 
         H_vap = self.enthalpy_vaporization
 
         cte = H_vap / gas_constant
-        P_arr = self.triple_point[1] * np.exp(cte * (1/self.triple_point[0] - 1/T_arr))
+        P_arr = self.triple_point.pressure * np.exp(cte * (1/self.triple_point.temperature - 1/T_arr))
         return T_arr, P_arr
 
     @property
@@ -254,8 +258,8 @@ class PhaseDiagram:
             (temperature array, pressure array, A, B, C, Tmin, Tmax)
         """
         # log10(P) = A - (B / (C + T))
-        T_arr = np.linspace(self.triple_point[0].magnitude,
-                            self.critical_point[0].magnitude, 100) * ureg.K
+        T_arr = np.linspace(self.triple_point.temperature.magnitude,
+                            self.critical_point.temperature.magnitude, 100) * ureg.K
 
         Tmin, Tmax, A, B, C = self.antoine_si
 
@@ -375,11 +379,11 @@ class PhaseDiagram:
                     'r-', label='LV boundary - Antoine', linewidth=linewidth)
 
         if parts[2] == 1 or parts[3] == 1:
-            ax.scatter(self.critical_point[0], self.critical_point[1],
+            ax.scatter(self.critical_point.temperature, self.critical_point.pressure,
                        s=100, label='Critical Point',
                        facecolors='orange', edgecolors='orange', zorder=3)
 
-        ax.scatter(self.triple_point[0], self.triple_point[1],
+        ax.scatter(self.triple_point.temperature, self.triple_point.pressure,
                    s=100, label='Triple Point',
                    facecolors='m', edgecolors='m', zorder=3)
 
