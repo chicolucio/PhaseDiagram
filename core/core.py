@@ -27,6 +27,15 @@ def database_dict(database):
 d = database_dict(DB)
 
 
+def interaction_table():
+    names = d['names'].drop(['id', 'name_alt1', 'name_alt2', 'name_alt3'], axis=1)
+    compound = d['compounds'].drop(['name'], axis=1)
+    compound['name'] = names
+    compounds = compound[['id', 'name', 'formula', 'cas', 'molar mass']]
+    compound_table = compounds.style.hide_index()
+    return compound_table
+
+
 def compound_index(compound):
     compound_name_idx = d['names'].loc[d['names'].isin([compound]).any(axis=1)].index.tolist()
     compound_formula_cas_idx = d['compounds'].loc[d['compounds'].isin([compound]).any(axis=1)].index.tolist()
