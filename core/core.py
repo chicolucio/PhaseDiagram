@@ -4,8 +4,8 @@ import numpy as np
 from scipy import constants
 from . import ureg
 import re
-import matplotlib.pyplot as plt
 from collections import namedtuple
+import matplotlib.pyplot as plt
 
 DB = 'data/data.db'
 
@@ -311,96 +311,36 @@ class PhaseDiagram:
                 linewidth=linewidth - 0.5)
         ax.grid(b=True, which='minor', axis='both',
                 linestyle=':', linewidth=linewidth - 1)
-        ax.tick_params(which='both', labelsize=size+2)
+        ax.tick_params(which='both', labelsize=size + 2)
         ax.tick_params(which='major', length=6, axis='both')
         ax.tick_params(which='minor', length=3, axis='both')
 
         # labels and size
-        ax.xaxis.label.set_size(size+4)
-        ax.yaxis.label.set_size(size+4)
+        ax.xaxis.label.set_size(size + 4)
+        ax.yaxis.label.set_size(size + 4)
         # ax.title.set_fontsize(size+6)  # not working, don't know why...
 
         return
 
-    def plot(self, parts=(1, 1, 0, 1), size=(10, 8), ax=None, T_unit='K',
-             P_unit='Pa', scale_log=True, legend=False, title=True,
-             title_text=''):
-        """Plot function
-        Parameters
-        ----------
-        parts : tuple, optional
-            which lines will be plotted, by default (1, 1, 0, 1)
-            By default, the solid-liquid, solid-vapor and liquid-vapor from
-            Antoine equation lines are plotted. This can be changed with 0 and
-            1's in a tuple`. 0 means turn off and 1 means turn on. The order in
-            the tuple is:
-            (solid-liquid Clausius-Clapeyron, solid-vapor Clausius-Clapeyron,
-            liquid-vapor Clausius-Clapeyron, liquid-vapor Antoine)
-        size : tuple, optional
-            plot size, by default (10, 8)
-        ax : Matplotlib axes, optional
-            axes where the graph will be plotted, by default None
-        T_unit : str, optional
-            temperature unit, by default 'K'
-        P_unit : str, optional
-            pressure unit, by default 'Pa'
-        scale_log : bool, optional
-            logarithmic scale, by default True
-        legend : bool, optional
-            If a legend will be shown, by default False
-        title : bool, optional
-            If the plot will have a title, by default True
-        title_text : str, optional
-            Title text, by default ''
-        Returns
-        -------
-        Matplotlib axes
-            axes where the graph will be plotted
-        """
-        if ax is None:
-            fig, ax = plt.subplots(figsize=size, facecolor=(1.0, 1.0, 1.0))
+    @staticmethod
+    def plot_arrays(tuple_two_arrays, tuple_units, limit=None, ax=None, **kwargs):
+        temperature, pressure = tuple_two_arrays
+        try:
+            pressure = pressure[pressure < limit]
+            temperature = temperature[:len(pressure)]
+        except:
+            pass
+        ax.plot(temperature.to(tuple_units[0]), pressure.to(tuple_units[1]), **kwargs)
+
+    @staticmethod
+    def plot_point(tuple_point, ax=None, **kwargs):
+        ax.scatter(tuple_point[0], tuple_point[1], **kwargs)
+
+    def plot_customization(self, ax=None, T_unit='K',
+                           P_unit='Pa', scale_log=True, legend=False, title=True,
+                           title_text=''):
 
         self._plot_params(ax)
-
-        linewidth = 3.0
-
-        if parts[0] == 1:
-            T_clapeyron_sl, P_clapeyron_sl = self.clapeyron_sl()
-
-            # ax.plot(T_clapeyron_sl.to(T_unit), P_clapeyron_sl.to(P_unit))
-            # in order to avoid long SL lines, limit the pressure values to
-            # those lower than self.CP_pressure
-            P_clapeyron_sl = P_clapeyron_sl[P_clapeyron_sl < self.critical_point[1]]
-            ax.plot(T_clapeyron_sl[:len(P_clapeyron_sl)].to(T_unit),
-                    P_clapeyron_sl.to(P_unit),
-                    'k-', label='SL boundary', linewidth=linewidth)
-
-        if parts[1] == 1:
-            T_clapeyron_sv, P_clapeyron_sv = self.clapeyron_sv()
-            ax.plot(T_clapeyron_sv.to(T_unit),
-                    P_clapeyron_sv.to(P_unit),
-                    'b-', label='SV boundary', linewidth=linewidth)
-
-        if parts[2] == 1:
-            T_clapeyron_lv, P_clapeyron_lv = self.clapeyron_lv()
-            ax.plot(T_clapeyron_lv.to(T_unit),
-                    P_clapeyron_lv.to(P_unit),
-                    'g--', label='LV boundary', linewidth=linewidth)
-
-        if parts[3] == 1:
-            T_antoine_lv, P_antoine_lv = self.antoine_lv()
-            ax.plot(T_antoine_lv.to(T_unit),
-                    P_antoine_lv.to(P_unit),
-                    'r-', label='LV boundary - Antoine', linewidth=linewidth)
-
-        if parts[2] == 1 or parts[3] == 1:
-            ax.scatter(self.critical_point.temperature, self.critical_point.pressure,
-                       s=100, label='Critical Point',
-                       facecolors='orange', edgecolors='orange', zorder=3)
-
-        ax.scatter(self.triple_point.temperature, self.triple_point.pressure,
-                   s=100, label='Triple Point',
-                   facecolors='m', edgecolors='m', zorder=3)
 
         if scale_log:
             ax.set_yscale('log')
@@ -413,6 +353,7 @@ class PhaseDiagram:
             ax.figure.canvas.draw()  # Update the text
             order_magnitude = ax.yaxis.get_offset_text().get_text().replace('\\times', '')
             ax.yaxis.offsetText.set_visible(False)
+
             ax.set_ylabel('Pressure / ' + order_magnitude +
                           ' {:~P}'.format(ureg(P_unit).units))
 
@@ -431,3 +372,4 @@ class PhaseDiagram:
             ax.set_title(title_text, fontsize=18)
 
         return ax
+
