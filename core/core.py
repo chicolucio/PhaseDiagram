@@ -295,13 +295,10 @@ class PhaseDiagram:
         label_formula = r'$\mathregular{'+label_formula+'}$'
         return label_formula
 
-    def _plot_params(self, ax=None):
-        """Internal function for plot parameters.
-        Parameters
-        ----------
-        ax : Matplotlib axes, optional
-            axes where the graph will be plotted, by default None
-        """
+    def plot_customization(self, ax=None, T_unit='K',
+                           P_unit='Pa', scale_log=True, legend=False, title=True,
+                           title_text=''):
+
         linewidth = 2
         size = 12
 
@@ -319,28 +316,6 @@ class PhaseDiagram:
         ax.xaxis.label.set_size(size + 4)
         ax.yaxis.label.set_size(size + 4)
         # ax.title.set_fontsize(size+6)  # not working, don't know why...
-
-        return
-
-    @staticmethod
-    def plot_arrays(tuple_two_arrays, tuple_units, limit=None, ax=None, **kwargs):
-        temperature, pressure = tuple_two_arrays
-        try:
-            pressure = pressure[pressure < limit]
-            temperature = temperature[:len(pressure)]
-        except:
-            pass
-        ax.plot(temperature.to(tuple_units[0]), pressure.to(tuple_units[1]), **kwargs)
-
-    @staticmethod
-    def plot_point(tuple_point, ax=None, **kwargs):
-        ax.scatter(tuple_point[0], tuple_point[1], **kwargs)
-
-    def plot_customization(self, ax=None, T_unit='K',
-                           P_unit='Pa', scale_log=True, legend=False, title=True,
-                           title_text=''):
-
-        self._plot_params(ax)
 
         if scale_log:
             ax.set_yscale('log')
@@ -372,4 +347,19 @@ class PhaseDiagram:
             ax.set_title(title_text, fontsize=18)
 
         return ax
+
+    def plot_arrays(self, tuple_two_arrays, tuple_units, limit=None, ax=None, **kwargs):
+        temperature, pressure = tuple_two_arrays
+        try:
+            pressure = pressure[pressure < limit]
+            temperature = temperature[:len(pressure)]
+        except:
+            pass
+        ax.plot(temperature.to(tuple_units[0]), pressure.to(tuple_units[1]), **kwargs)
+        self.plot_customization(ax=ax)
+
+    def plot_point(self, tuple_point, ax=None, **kwargs):
+        ax.scatter(tuple_point[0], tuple_point[1], **kwargs)
+        self.plot_customization(ax=ax)
+
 
