@@ -295,71 +295,83 @@ class PhaseDiagram:
         label_formula = r'$\mathregular{'+label_formula+'}$'
         return label_formula
 
-    def plot_customization(self, ax=None, T_unit='K',
-                           P_unit='Pa', scale_log=True, legend=False, title=True,
-                           title_text=''):
+
+class Plot:
+    def __init__(self, x_unit, y_unit, ax=None, scale_log=True, legend=False, title=True, title_text=''):
+        self.x_unit = x_unit
+        self.y_unit = y_unit
+        self.ax = ax
+        self.scale_log = scale_log
+        self.legend = legend
+        self.title = title
+        self.title_text = title_text
+
+        if self.ax is None:
+            fig, self.ax = plt.subplots(figsize=(10, 8), facecolor=(1.0, 1.0, 1.0))
+
+    def plot_customization(self):
 
         linewidth = 2
         size = 12
 
         # grid and ticks settings
-        ax.minorticks_on()
-        ax.grid(b=True, which='major', linestyle='--',
-                linewidth=linewidth - 0.5)
-        ax.grid(b=True, which='minor', axis='both',
-                linestyle=':', linewidth=linewidth - 1)
-        ax.tick_params(which='both', labelsize=size + 2)
-        ax.tick_params(which='major', length=6, axis='both')
-        ax.tick_params(which='minor', length=3, axis='both')
+        self.ax.minorticks_on()
+        self.ax.grid(b=True, which='major', linestyle='--',
+                     linewidth=linewidth - 0.5)
+        self.ax.grid(b=True, which='minor', axis='both',
+                     linestyle=':', linewidth=linewidth - 1)
+        self.ax.tick_params(which='both', labelsize=size + 2)
+        self.ax.tick_params(which='major', length=6, axis='both')
+        self.ax.tick_params(which='minor', length=3, axis='both')
 
         # labels and size
-        ax.xaxis.label.set_size(size + 4)
-        ax.yaxis.label.set_size(size + 4)
+        self.ax.xaxis.label.set_size(size + 4)
+        self.ax.yaxis.label.set_size(size + 4)
         # ax.title.set_fontsize(size+6)  # not working, don't know why...
 
-        if scale_log:
-            ax.set_yscale('log')
-            ax.set_ylabel('log(Pressure / {:~P})'.format(ureg(P_unit).units))
+        if self.scale_log:
+            self.ax.set_yscale('log')
+            self.ax.set_ylabel('log(Pressure / {:~P})'.format(ureg(self.y_unit).units))
         else:
             # setting the y-axis to scientific notation and
             # getting the order of magnitude
-            ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-            ax.yaxis.major.formatter._useMathText = True
-            ax.figure.canvas.draw()  # Update the text
-            order_magnitude = ax.yaxis.get_offset_text().get_text().replace('\\times', '')
-            ax.yaxis.offsetText.set_visible(False)
+            self.ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+            self.ax.yaxis.major.formatter._useMathText = True
+            self.ax.figure.canvas.draw()  # Update the text
+            order_magnitude = self.ax.yaxis.get_offset_text().get_text().replace('\\times', '')
+            self.ax.yaxis.offsetText.set_visible(False)
 
-            ax.set_ylabel('Pressure / ' + order_magnitude +
-                          ' {:~P}'.format(ureg(P_unit).units))
+            self.ax.set_ylabel('Pressure / ' + order_magnitude +
+                          ' {:~P}'.format(ureg(self.y_unit).units))
 
-        ax.set_xlabel('Temperature / {:~P}'.format(ureg(T_unit).units))
+        self.ax.set_xlabel('Temperature / {:~P}'.format(ureg(self.x_unit).units))
 
-        if legend:
-            ax.legend(loc='best', fontsize=14,
-                      title=self.format_formula(), title_fontsize=14)
+        if self.legend:
+            self.ax.legend(loc='best', fontsize=14,
+                           title=self.format_formula(), title_fontsize=14)
 
-        if not title:
+        if not self.title:
             pass
-        elif title_text == '':
-            ax.set_title('Calculated phase diagram - ' + self.format_formula(),
-                         fontsize=18)
+        elif self.title_text == '':
+            # TODO: resolver o format_formula
+            # self.ax.set_title('Calculated phase diagram - ' + self.format_formula(),
+            #                   fontsize=18)
+            pass
         else:
-            ax.set_title(title_text, fontsize=18)
+            self.ax.set_title(self.title_text, fontsize=18)
 
-        return ax
+        return self.ax
 
-    def plot_arrays(self, tuple_two_arrays, tuple_units, limit=None, ax=None, **kwargs):
-        temperature, pressure = tuple_two_arrays
+    def plot_arrays(self, tuple_two_arrays, limit=None, **kwargs):
+        x, y = tuple_two_arrays
         try:
-            pressure = pressure[pressure < limit]
-            temperature = temperature[:len(pressure)]
+            y = y[y < limit]
+            x = x[:len(y)]
         except:
             pass
-        ax.plot(temperature.to(tuple_units[0]), pressure.to(tuple_units[1]), **kwargs)
-        self.plot_customization(ax=ax)
+        self.ax.plot(x.to(self.x_unit), y.to(self.y_unit), **kwargs)
+        self.plot_customization()
 
-    def plot_point(self, tuple_point, ax=None, **kwargs):
-        ax.scatter(tuple_point[0], tuple_point[1], **kwargs)
-        self.plot_customization(ax=ax)
-
-
+    def plot_point(self, tuple_point, **kwargs):
+        self.ax.scatter(tuple_point[0].to(self.x_unit), tuple_point[1].to(self.y_unit), **kwargs)
+        self.plot_customization()
