@@ -1,4 +1,5 @@
-from core.core import PhaseDiagram, state_index, compound_index
+from phase_diagram.phase_diagram import PhaseDiagram
+from src.helpers import compound_index, state_index
 import pint
 
 

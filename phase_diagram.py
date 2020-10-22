@@ -1,1 +1,1 @@
-from core.core import PhaseDiagram
+from phase_diagram.phase_diagram import PhaseDiagram
