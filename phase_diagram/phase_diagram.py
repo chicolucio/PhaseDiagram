@@ -3,9 +3,11 @@ from scipy import constants
 
 from src.helpers import compound_index, compound_identification, compound_names, density_table, density, \
     antoine, point, enthalpy, volume_change_fusion
+from src.plot import Plot
 from . import ureg
 import re
 from collections import namedtuple
+import matplotlib.pyplot as plt
 
 
 gas_constant = constants.gas_constant * ureg.J/(ureg.mol*ureg.K)
@@ -34,6 +36,7 @@ class PhaseDiagram:
         self.enthalpy_vaporization = enthalpy(self.compound, 'vaporization')
         self.volume_change_fusion = volume_change_fusion(self.compound)
         self.density_table = density_table(self.compound)
+        self.ureg = ureg
 
     def __repr__(self):
         return f'{self.__class__.__name__}(name= {self.name}, CAS= {self.cas}, formula= {self.formula})'
@@ -143,4 +146,42 @@ class PhaseDiagram:
         label_formula = r'$\mathregular{'+label_formula+'}$'
         return label_formula
 
+    def plot(self, ax=None, T_unit='K', P_unit='Pa', scale_log=True, legend=True, title=True, title_text='',
+             clapeyron_lv=False):
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(10, 8), facecolor=(1.0, 1.0, 1.0))
 
+        if title_text == '':
+            title_text = f'Calculated phase diagram - {self.format_formula()}'
+
+        graph = Plot(ax=ax, x_label='Temperature', y_label='Pressure', x_unit=T_unit, y_unit=P_unit, legend=legend,
+                     scale_log=scale_log, title=title, title_text=title_text)
+        linewidth = 3
+        marker_size = 100
+        graph.plot_arrays(self.clapeyron_sl(), limit=self.critical_point.pressure, label='Clapeyron S-L',
+                          linewidth=linewidth, zorder=1)
+        graph.plot_arrays(self.clapeyron_sv(), label='Clapeyron S-V', linewidth=linewidth, zorder=1)
+        graph.plot_arrays(self.antoine_lv(), label='Antoine L-V', linewidth=linewidth, zorder=1)
+
+        if clapeyron_lv:
+            graph.plot_arrays(self.clapeyron_lv(), label='Clapeyron L-V', linewidth=linewidth, linestyle='--', zorder=1)
+
+        graph.plot_point(self.triple_point, label='Triple Point', color='red', s=marker_size, zorder=2)
+        graph.plot_point(self.critical_point, label='Critical Point', color='purple', s=marker_size, zorder=2)
+
+    @staticmethod
+    def plot_custom(curves=None, points=None, ax=None, T_unit='K', P_unit='Pa', scale_log=True, legend=True,
+                    title=True, title_text=''):
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(10, 8), facecolor=(1.0, 1.0, 1.0))
+
+        graph = Plot(ax=ax, x_label='Temperature', y_label='Pressure', x_unit=T_unit, y_unit=P_unit, legend=legend,
+                     scale_log=scale_log, title=title,
+                     title_text=title_text)
+        if curves:
+            for curve in curves:
+                graph.plot_arrays(curve['data_tuple'], label=curve['label'], **curve['kwargs'])
+
+        if points:
+            for point in points:
+                graph.plot_point(point['data_tuple'], label=point['label'], **point['kwargs'])
