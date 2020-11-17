@@ -20,7 +20,6 @@ class Plot:
             fig, self.ax = plt.subplots(figsize=(10, 8), facecolor=(1.0, 1.0, 1.0))
 
     def plot_customization(self):
-        # TODO: Tirar referência a temperatura e pressão
         linewidth = 2
         size = 12
 
@@ -37,7 +36,6 @@ class Plot:
         # labels and size
         self.ax.xaxis.label.set_size(size + 4)
         self.ax.yaxis.label.set_size(size + 4)
-        # ax.title.set_fontsize(size+6)  # not working, don't know why...
 
         if self.scale_log:
             self.ax.set_yscale('log')
