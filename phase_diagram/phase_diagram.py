@@ -37,12 +37,25 @@ class PhaseDiagram:
         self.volume_change_fusion = volume_change_fusion(self.compound)
         self.density_table = density_table(self.compound)
         self.ureg = ureg
+        self.number_of_points = 100
 
     def __repr__(self):
         return f'{self.__class__.__name__}(name= {self.name}, CAS= {self.cas}, formula= {self.formula})'
 
     def __str__(self):
         return f'Phase diagram data for compound {self.name}, CAS {self.cas}, formula {self.formula}'
+
+    def _clapeyron_sl(self, temperature):
+        cte = self.enthalpy_fusion / self.volume_change_fusion
+        return self.triple_point.pressure + cte * np.log(temperature / self.triple_point.temperature)
+
+    def _clapeyron_sv_lv(self, temperature, cte):
+        return self.triple_point.pressure * np.exp(cte * (1/self.triple_point.temperature - 1/temperature))
+
+    def _antoine_lv(self, temperature):
+        Tmin, Tmax, A, B, C = self.antoine_si
+        right_side = A - (B / (C + temperature.magnitude))
+        return 10**right_side * ureg.Pa
 
     def clapeyron_sl(self, temp_range=5):
         """Clausius-Clapeyron solid-liquid line data
@@ -56,16 +69,14 @@ class PhaseDiagram:
             Tuple of arrays (temperature, pressure)
         """
         # P(T) = P' + (H_melt / V_melt) ln(T / T') where T' is TP_temperature
-        V_melt = self.volume_change_fusion
 
-        if V_melt > 0:
+        if self.volume_change_fusion > 0:
             temp_range = -temp_range
 
         T_arr = np.linspace(self.triple_point.temperature.magnitude,
                             self.triple_point.temperature.magnitude-temp_range,
-                            100) * ureg.kelvin
-        cte = self.enthalpy_fusion / V_melt
-        P_arr = self.triple_point.pressure + cte * np.log(T_arr / self.triple_point.temperature)
+                            self.number_of_points) * ureg.kelvin
+        P_arr = self._clapeyron_sl(T_arr)
         return T_arr, P_arr
 
     def clapeyron_sv(self, temp_range=60):
@@ -82,9 +93,9 @@ class PhaseDiagram:
         # P(T) = P' exp[ (H_sub / R) (1 / T' - 1 / T) ] where T' is triple_point[0]
         T_arr = np.linspace(self.triple_point.temperature.magnitude - temp_range,
                             self.triple_point.temperature.magnitude,
-                            100) * ureg.K
+                            self.number_of_points) * ureg.K
         cte = self.enthalpy_sublimation / gas_constant
-        P_arr = self.triple_point.pressure * np.exp(cte * (1/self.triple_point.temperature - 1/T_arr))
+        P_arr = self._clapeyron_sv_lv(T_arr, cte)
         return T_arr, P_arr
 
     def clapeyron_lv(self):
@@ -97,12 +108,12 @@ class PhaseDiagram:
         # P(T) = P' exp[ (H_vap / R) (1 / T' - 1 / T) ] where T' is TP_temperature
         T_arr = np.linspace(self.triple_point.temperature.magnitude,
                             self.critical_point.temperature.magnitude,
-                            100) * ureg.kelvin
+                            self.number_of_points) * ureg.kelvin
 
         H_vap = self.enthalpy_vaporization
 
         cte = H_vap / gas_constant
-        P_arr = self.triple_point.pressure * np.exp(cte * (1/self.triple_point.temperature - 1/T_arr))
+        P_arr = self._clapeyron_sv_lv(T_arr, cte)
         return T_arr, P_arr
 
     @property
@@ -125,13 +136,9 @@ class PhaseDiagram:
         """
         # log10(P) = A - (B / (C + T))
         T_arr = np.linspace(self.triple_point.temperature.magnitude,
-                            self.critical_point.temperature.magnitude, 100) * ureg.K
+                            self.critical_point.temperature.magnitude, self.number_of_points) * ureg.K
 
-        Tmin, Tmax, A, B, C = self.antoine_si
-
-        right_side = A - (B / (C + T_arr.magnitude))
-
-        P_arr = 10**right_side * ureg.Pa
+        P_arr = self._antoine_lv(T_arr)
 
         return T_arr, P_arr
 
