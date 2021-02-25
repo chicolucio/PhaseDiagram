@@ -191,3 +191,20 @@ class PhaseDiagram:
         if points:
             for point in points:
                 graph.plot_point(point['data_tuple'], label=point['label'], **point['kwargs'])
+
+    def physical_state(self, point):
+        state = ''
+        if point[0] > self.critical_point.temperature:
+            if point[1] > self.critical_point.pressure:
+                state = 'supercritical fluid'
+            else:
+                state = 'gas'
+        elif (point[0] > self.triple_point.temperature) and (point[1] < self._antoine_lv(point[0])):
+            state = 'vapour'
+        elif (point[0] < self.triple_point.temperature) and (point[1] < self._clapeyron_sv_lv(point[0], curve='sv')):
+            state = 'vapour'
+        elif self.volume_change_fusion > 0:
+            pass
+        elif self.volume_change_fusion < 0:
+            pass
+        return state
