@@ -49,7 +49,11 @@ class PhaseDiagram:
         cte = self.enthalpy_fusion / self.volume_change_fusion
         return self.triple_point.pressure + cte * np.log(temperature / self.triple_point.temperature)
 
-    def _clapeyron_sv_lv(self, temperature, cte):
+    def _clapeyron_sv_lv(self, temperature, curve):
+        if curve == 'sv':
+            cte = self.enthalpy_sublimation / gas_constant
+        if curve == 'lv':
+            cte = self.enthalpy_vaporization / gas_constant
         return self.triple_point.pressure * np.exp(cte * (1/self.triple_point.temperature - 1/temperature))
 
     def _antoine_lv(self, temperature):
@@ -94,8 +98,7 @@ class PhaseDiagram:
         T_arr = np.linspace(self.triple_point.temperature.magnitude - temp_range,
                             self.triple_point.temperature.magnitude,
                             self.number_of_points) * ureg.K
-        cte = self.enthalpy_sublimation / gas_constant
-        P_arr = self._clapeyron_sv_lv(T_arr, cte)
+        P_arr = self._clapeyron_sv_lv(T_arr, curve='sv')
         return T_arr, P_arr
 
     def clapeyron_lv(self):
@@ -109,11 +112,7 @@ class PhaseDiagram:
         T_arr = np.linspace(self.triple_point.temperature.magnitude,
                             self.critical_point.temperature.magnitude,
                             self.number_of_points) * ureg.kelvin
-
-        H_vap = self.enthalpy_vaporization
-
-        cte = H_vap / gas_constant
-        P_arr = self._clapeyron_sv_lv(T_arr, cte)
+        P_arr = self._clapeyron_sv_lv(T_arr, curve='lv')
         return T_arr, P_arr
 
     @property
