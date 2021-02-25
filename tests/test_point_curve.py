@@ -15,6 +15,13 @@ def straight_line(x0, range_=0, points=1, a=1, b=0):
     return x, y
 
 
+@ureg.wraps(ureg.m, (ureg.m, ureg.m, None, ureg.m, ureg.m), strict=False)
+def straight_line_y(x0, range_=0, points=1, a=1, b=0):
+    x = np.linspace(x0, x0 + range_, points)
+    y = a * x + b
+    return y
+
+
 def test_point_in_straight_line_one_point():
     assert point_in_curve((Q_('3 m'), Q_('3 m')), straight_line(3))
 
@@ -36,16 +43,16 @@ def test_point_in_straight_line_two_points_not_in_return_tuple():
 
 
 def test_point_in_straight_line_function():
-    assert point_in_function((Q_('3 m'), Q_('3 m')), straight_line)
+    assert point_in_function((Q_('3 m'), Q_('3 m')), straight_line_y)
 
 
 def test_point_not_in_straight_line_function():
-    assert not point_in_function((Q_('3 m'), Q_('4 m')), straight_line)
+    assert not point_in_function((Q_('3 m'), Q_('4 m')), straight_line_y)
 
 
 def test_point_in_straight_line_function_tolerance():
-    assert point_in_function((Q_('3 m'), Q_('3.001 m')), straight_line)
+    assert point_in_function((Q_('3 m'), Q_('3.001 m')), straight_line_y)
 
 
 def test_point_not_in_straight_line_function_tolerance():
-    assert not point_in_function((Q_('3 m'), Q_('3.002 m')), straight_line)
+    assert not point_in_function((Q_('3 m'), Q_('3.002 m')), straight_line_y)
