@@ -204,7 +204,13 @@ class PhaseDiagram:
         elif (point[0] < self.triple_point.temperature) and (point[1] < self._clapeyron_sv_lv(point[0], curve='sv')):
             state = 'vapour'
         elif self.volume_change_fusion > 0:
-            pass
+            if (point[0] < self.triple_point.temperature) and (point[1] > self._clapeyron_sv_lv(point[0], curve='sv')):
+                state = 'solid'
+            else:
+                state = 'liquid'
         elif self.volume_change_fusion < 0:
-            pass
+            if (point[0] < self.triple_point.temperature) and (point[1] > self._clapeyron_sv_lv(point[0],curve='sv')):
+                state = 'solid'
+            else:
+                state ='liquid'
         return state
