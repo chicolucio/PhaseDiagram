@@ -29,7 +29,6 @@ def test_solid():
 def test_liquid():
     assert water.physical_state((Q_water('400 K'), Q_water('1e7 Pa'))) == 'liquid'
 
-
 def test_supercritical_fluid_carbon_dioxide():
     assert carbon_dioxide.physical_state((Q_carbon('350 K'), Q_carbon('1e10 Pa'))) == 'supercritical fluid'
 
@@ -48,3 +47,20 @@ def test_solid_dioxide_carbon():
 def test_liquid_dioxide_carbon():
     assert carbon_dioxide.physical_state((Q_carbon('240 K'), Q_carbon('1e7 Pa'))) == 'liquid'
 
+def test_liquid_vapour_balance_water():
+    assert water.physical_state((Q_water('647.1 K'), Q_water('21936363.03431385 Pa'))) == 'liquid-vapour balance'
+
+def test_solid_liquid_balance_water():
+    assert water.physical_state((Q_water('268.16 K'), Q_water('70096120.44156641 Pa'))) == 'solid-liquid balance'
+
+def test_solid_vapour_balance_water():
+    assert water.physical_state((Q_water('213.16000000000003 K'), Q_water('2.619617119846615 Pa'))) == 'solid-vapour balance'
+
+def test_liquid_vapour_balance_dioxide_carbon():
+    assert carbon_dioxide.physical_state((Q_carbon('304.13 K'), Q_carbon('7371844.047303765 Pa'))) == 'liquid-vapour balance'
+
+def test_solid_liquid_balance_dioxide_carbon():
+    assert carbon_dioxide.physical_state((Q_carbon('221.58 K'), Q_carbon('23011236.108132083 Pa'))) == 'solid-liquid balance'
+
+def test_solid_vapour_balance_dioxide_carbon():
+    assert carbon_dioxide.physical_state((Q_carbon('156.58 K'), Q_carbon('2.619617119846615 Pa'))) == 'solid-vapour balance'
