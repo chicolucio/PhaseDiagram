@@ -1,9 +1,12 @@
+from functools import partial
+
 import numpy as np
 from scipy import constants
 
 from src.helpers import compound_index, compound_identification, compound_names, density_table, density, \
     antoine, point, enthalpy, volume_change_fusion
 from src.plot import Plot
+from src.point_in_curve import point_in_function
 from . import ureg
 import re
 from collections import namedtuple
@@ -194,27 +197,56 @@ class PhaseDiagram:
 
     def physical_state(self, point):
         state = ''
-        # pontos nas curvas
-        if self._antoine_lv(point[0]) in self.antoine_lv()[1]:
+        clapeyron_sv = partial(self._clapeyron_sv_lv, curve='sv')
+
+        # triple point temperature
+
+        if point[0] == self.triple_point[0]:
+            if point[1] < self.triple_point[1]:
+                state = 'vapour'
+            else:
+                if self.volume_change_fusion < 0:
+                    state = 'liquid'
+                else:
+                    state = 'solid'
+
+        # critical point temperature
+
+        elif point[0] == self.critical_point[0]:
+            if point[1] < self.critical_point[1]:
+                state = 'vapour'
+            else:
+                state = 'liquid'
+
+        # point on curve
+
+        elif point_in_function(point, self._antoine_lv):
             state = 'liquid-vapour balance'
-        elif self._clapeyron_sl(point[0]) in self.clapeyron_sl()[1]:
+        elif point_in_function(point, self._clapeyron_sl):
             state = 'solid-liquid balance'
-        elif self._clapeyron_sv_lv(point[0], curve='sv') in self.clapeyron_sv()[1]:
+        elif point_in_function(point, clapeyron_sv):
             state = 'solid-vapour balance'
-        # pontos fora das curvas
+
+        # regions
+
         elif point[0] > self.critical_point.temperature:
             if point[1] > self.critical_point.pressure:
                 state = 'supercritical fluid'
             else:
                 state = 'gas'
-        elif point[0] > self.triple_point.temperature:
-            if point[1] < self._antoine_lv(point[0]):
-                state = 'vapour'
+        elif (point[0] > self.triple_point.temperature) and (point[1] < self._antoine_lv(point[0])):
+            state = 'vapour'
+        elif (point[0] < self.triple_point.temperature) and (point[1] < self._clapeyron_sv_lv(point[0], curve='sv')):
+            state = 'vapour'
+        elif self.volume_change_fusion > 0:
+            if (point[0] < self.triple_point.temperature) and (point[1] > self._clapeyron_sv_lv(point[0], curve='sv')):
+                state = 'solid'
             else:
                 state = 'liquid'
-        else:
-            if point[1] < self._clapeyron_sv_lv(point[0], curve='sv'):
-                state = 'vapour'
-            else:
+        elif self.volume_change_fusion < 0:
+            if (point[0] < self.triple_point.temperature) and (point[1] > self._clapeyron_sv_lv(point[0],curve='sv')):
                 state = 'solid'
+            else:
+                state = 'liquid'
+
         return state
