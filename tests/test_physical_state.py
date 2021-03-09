@@ -47,16 +47,16 @@ def test_vapour_close_to_sv_curve_carbon_dioxide():
     assert carbon_dioxide.physical_state((Q_('200 K'), Q_('1e4 Pa'))) == 'vapour'
 
 
-def test_solid_dioxide_carbon():
+def test_solid_carbon_dioxide():
     assert carbon_dioxide.physical_state((Q_('180 K'), Q_('1e6 Pa'))) == 'solid'
 
 
-def test_liquid_dioxide_carbon():
+def test_liquid_carbon_dioxide():
     assert carbon_dioxide.physical_state((Q_('240 K'), Q_('1e7 Pa'))) == 'liquid'
 
 
 def test_liquid_vapour_balance_water():
-    assert water.physical_state((Q_('647.1 K'), Q_('21936363.03431385 Pa'))) == 'liquid-vapour balance'
+    assert water.physical_state((Q_('643.32282828 K'), Q_('21056478.669068832 Pa'))) == 'liquid-vapour balance'
 
 
 def test_solid_liquid_balance_water():
@@ -67,13 +67,37 @@ def test_solid_vapour_balance_water():
     assert water.physical_state((Q_('213.16000000000003 K'), Q_('2.619617119846615 Pa'))) == 'solid-vapour balance'
 
 
-def test_liquid_vapour_balance_dioxide_carbon():
-    assert carbon_dioxide.physical_state((Q_('304.13 K'), Q_('7371844.047303765 Pa'))) == 'liquid-vapour balance'
+def test_liquid_vapour_balance_carbon_dioxide():
+    assert carbon_dioxide.physical_state((Q_('300 K'), Q_('6733410.220019728 Pa'))) == 'liquid-vapour balance'
 
 
-def test_solid_liquid_balance_dioxide_carbon():
+def test_solid_liquid_balance_carbon_dioxide():
     assert carbon_dioxide.physical_state((Q_('221.58 K'), Q_('23011236.108132083 Pa'))) == 'solid-liquid balance'
 
 
-def test_solid_vapour_balance_dioxide_carbon():
-    assert carbon_dioxide.physical_state((Q_('156.58 K'), Q_('2.619617119846615 Pa'))) == 'solid-vapour balance'
+def test_solid_vapour_balance_carbon_dioxide():
+    assert carbon_dioxide.physical_state((Q_('156.58 K'), Q_('2431.4640881597606 Pa'))) == 'solid-vapour balance'
+
+
+def test_temperature_triple_point_low_pressure_water():
+    assert water.physical_state((Q_('273.16 K'), Q_('1E2 Pa'))) == 'vapour'
+
+
+def test_temperature_triple_point_high_pressure_water():
+    assert water.physical_state((Q_('273.16 K'), Q_('1E9 Pa'))) == 'liquid'
+
+
+def test_temperature_triple_point_low_pressure_carbon_dioxide():
+    assert carbon_dioxide.physical_state((Q_('216.58 K'), Q_('1E2 Pa'))) == 'vapour'
+
+
+def test_temperature_triple_point_high_pressure_carbon_dioxide():
+    assert carbon_dioxide.physical_state((Q_('216.58 K'), Q_('1E7 Pa'))) == 'solid'
+
+
+def test_temperature_critical_point_low_pressure_water():
+    assert water.physical_state((Q_('647.1 K'), Q_('1E2 Pa'))) == 'vapour'
+
+
+def test_temperature_critical_point_high_pressure_water():
+    assert water.physical_state((Q_('647.1 K'), Q_('1E9 Pa'))) == 'liquid'
