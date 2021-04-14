@@ -1,6 +1,7 @@
 from phase_diagram.phase_diagram import PhaseDiagram
 from src.helpers import compound_index, state_index
 import pint
+import numpy as np
 
 
 def test_water():
@@ -23,7 +24,7 @@ def test_water():
     assert water_data.enthalpy_fusion == pint.Quantity(6.009, 'kJ/mole')
     assert water_data.enthalpy_sublimation == pint.Quantity(44.0, 'kJ/mole')
     assert water_data.enthalpy_vaporization == pint.Quantity(40.66, 'kJ/mole')
-    assert water_data.volume_change_fusion == pint.Quantity(-1.634, 'cm**3/mole')
+    assert np.isclose(water_data.volume_change_fusion, pint.Quantity(-1.583, 'cm**3/mole'), atol=1E-3)
 
 
 def test_water_cas():
