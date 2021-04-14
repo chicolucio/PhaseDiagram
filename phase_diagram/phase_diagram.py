@@ -120,6 +120,13 @@ class PhaseDiagram:
 
     @property
     def antoine_si(self):
+        """
+        A, B and C in SI units.
+        Returns
+        -------
+        tuple
+            Minimum and maximum temperature for A, B and C in SI units.
+        """
         Tmin = self.antoine.Tmin + 273.15
         Tmax = self.antoine.Tmax + 273.15
         A = self.antoine.A + np.log10(101325/760)
@@ -133,10 +140,8 @@ class PhaseDiagram:
         Returns
         -------
         tuple
-            A, B and C for SI units. Temperature range (Tmin and Tmax) in Kelvin
-            (temperature array, pressure array, A, B, C, Tmin, Tmax)
+            temperature array, pressure array
         """
-        # log10(P) = A - (B / (C + T))
         T_arr = np.linspace(self.triple_point.temperature.magnitude,
                             self.critical_point.temperature.magnitude, self.number_of_points) * ureg.K
 
@@ -196,6 +201,19 @@ class PhaseDiagram:
                 graph.plot_point(point['data_tuple'], label=point['label'], **point['kwargs'])
 
     def physical_state(self, point):
+        """
+        Returns the physical state for a given point(temperature, pressure)
+        Parameters
+        ----------
+        point
+            tuple with temperature and pressure
+
+        Returns
+        -------
+        string
+            physical state
+
+        """
         state = ''
         clapeyron_sv = partial(self._clapeyron_sv_lv, curve='sv')
 
@@ -221,11 +239,11 @@ class PhaseDiagram:
         # point on curve
 
         elif point_in_function(point, self._antoine_lv):
-            state = 'liquid-vapour balance'
+            state = 'liquid-vapour curve'
         elif point_in_function(point, self._clapeyron_sl):
-            state = 'solid-liquid balance'
+            state = 'solid-liquid curve'
         elif point_in_function(point, clapeyron_sv):
-            state = 'solid-vapour balance'
+            state = 'solid-vapour curve'
 
         # regions
 
