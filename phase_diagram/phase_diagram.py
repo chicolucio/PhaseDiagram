@@ -18,6 +18,13 @@ gas_constant = constants.gas_constant * ureg.J/(ureg.mol*ureg.K)
 
 class PhaseDiagram:
     def __init__(self, compound):
+        """
+        Instantiates a PhaseDiagram object
+        Parameters
+        ----------
+        compound : str
+            compound name, formula or CAS
+        """
         self.compound = compound
         self.idx = compound_index(self.compound)
         self.cas = compound_identification(self.compound).cas
@@ -66,6 +73,7 @@ class PhaseDiagram:
 
     def clapeyron_sl(self, temp_range=5):
         """Clausius-Clapeyron solid-liquid line data
+
         Parameters
         ----------
         temp_range : int, optional
@@ -75,7 +83,6 @@ class PhaseDiagram:
         tuple
             Tuple of arrays (temperature, pressure)
         """
-        # P(T) = P' + (H_melt / V_melt) ln(T / T') where T' is TP_temperature
 
         if self.volume_change_fusion > 0:
             temp_range = -temp_range
@@ -88,6 +95,7 @@ class PhaseDiagram:
 
     def clapeyron_sv(self, temp_range=60):
         """Clausius-Clapeyron solid-vapor line data
+
         Parameters
         ----------
         temp_range : int, optional
@@ -97,7 +105,6 @@ class PhaseDiagram:
         tuple
             Tuple of arrays (temperature, pressure)
         """
-        # P(T) = P' exp[ (H_sub / R) (1 / T' - 1 / T) ] where T' is triple_point[0]
         T_arr = np.linspace(self.triple_point.temperature.magnitude - temp_range,
                             self.triple_point.temperature.magnitude,
                             self.number_of_points) * ureg.K
@@ -106,12 +113,12 @@ class PhaseDiagram:
 
     def clapeyron_lv(self):
         """Clausius-Clapeyron liquid-vapor line data
+
         Returns
         -------
         tuple
             Tuple of arrays (temperature, pressure)
         """
-        # P(T) = P' exp[ (H_vap / R) (1 / T' - 1 / T) ] where T' is TP_temperature
         T_arr = np.linspace(self.triple_point.temperature.magnitude,
                             self.critical_point.temperature.magnitude,
                             self.number_of_points) * ureg.kelvin
@@ -162,6 +169,28 @@ class PhaseDiagram:
 
     def plot(self, ax=None, T_unit='K', P_unit='Pa', scale_log=True, legend=True, title=True, title_text='',
              clapeyron_lv=False):
+        """
+        Plots the phase diagram
+
+        Parameters
+        ----------
+        ax : matplotlib axis, optional
+            axis where the plot will be shown. If None, one will be created
+        T_unit : str
+            pint unit of the temperature
+        P_unit : str
+            pint unit of the pressure
+        scale_log : bool, default=True
+            if the y-axis will have a log scale
+        legend : bool, default=True
+            if a legend will be shown
+        title : bool, default=True
+            if the plot will have a title
+        title_text : str, default=''
+            title text
+        clapeyron_lv : bool, default=False
+            if the Clapeyron liquid-vapour curve will be plotted along the Antoine one
+        """
         if ax is None:
             fig, ax = plt.subplots(figsize=(10, 8), facecolor=(1.0, 1.0, 1.0))
 
@@ -186,6 +215,30 @@ class PhaseDiagram:
     @staticmethod
     def plot_custom(curves=None, points=None, ax=None, T_unit='K', P_unit='Pa', scale_log=True, legend=True,
                     title=True, title_text=''):
+        """
+        Allow the creation of a custom plot
+
+        Parameters
+        ----------
+        curves : tuple
+            tuple with two arrays (x array, y array) with pint units
+        points : tuple
+            tuple with two values (x value, y value) with pint units
+        ax : matplotlib axis, optional
+            axis where the plot will be shown. If None, one will be created
+        T_unit : str
+            pint unit of the temperature
+        P_unit : str
+            pint unit of the pressure
+        scale_log : bool, default=True
+            if the y-axis will have a log scale
+        legend : bool, default=True
+            if a legend will be shown
+        title : bool, default=True
+            if the plot will have a title
+        title_text : str, default=''
+            title text
+        """
         if ax is None:
             fig, ax = plt.subplots(figsize=(10, 8), facecolor=(1.0, 1.0, 1.0))
 
@@ -212,7 +265,6 @@ class PhaseDiagram:
         -------
         string
             physical state
-
         """
         state = ''
         clapeyron_sv = partial(self._clapeyron_sv_lv, curve='sv')
@@ -262,7 +314,7 @@ class PhaseDiagram:
             else:
                 state = 'liquid'
         elif self.volume_change_fusion < 0:
-            if (point[0] < self.triple_point.temperature) and (point[1] > self._clapeyron_sv_lv(point[0],curve='sv')):
+            if (point[0] < self.triple_point.temperature) and (point[1] > self._clapeyron_sv_lv(point[0], curve='sv')):
                 state = 'solid'
             else:
                 state = 'liquid'
