@@ -1,8 +1,7 @@
 from phase_diagram.phase_diagram import PhaseDiagram
-from src.point_in_curve import point_in_curve, point_in_function
+from src.point_in_curve import point_in_function
 import numpy as np
 from functools import partial
-# from phase_diagram import ureg
 
 water = PhaseDiagram('H2O')
 ureg = water.ureg
@@ -11,38 +10,13 @@ Q_ = ureg.Quantity
 water_clapeyron_sv = partial(water._clapeyron_sv_lv, curve='sv')
 water_clapeyron_lv = partial(water._clapeyron_sv_lv, curve='lv')
 
-@ureg.wraps((ureg.m, ureg.m), (ureg.m, ureg.m, None, ureg.m, ureg.m), strict=False)
-def straight_line(x0, range_=0, points=1, a=1, b=0):
-    x = np.linspace(x0, x0 + range_, points)
-    y = a * x + b
-    return x, y
-
 
 @ureg.wraps(ureg.m, (ureg.m, ureg.m, None, ureg.m, ureg.m), strict=False)
 def straight_line_y(x0, range_=0, points=1, a=1, b=0):
+    """A function created to test point_in_function"""
     x = np.linspace(x0, x0 + range_, points)
     y = a * x + b
     return y
-
-
-def test_point_in_straight_line_one_point():
-    assert point_in_curve((Q_('3 m'), Q_('3 m')), straight_line(3))
-
-
-def test_point_not_in_straight_line_one_point():
-    assert not point_in_curve((Q_('3 m'), Q_('4 m')), straight_line(3))
-
-
-def test_point_in_straight_line_two_points():
-    assert point_in_curve((Q_('3 m'), Q_('3 m')), straight_line(3, 4, 2))
-
-
-def test_point_not_in_straight_line_two_points():
-    assert not point_in_curve((Q_('3 m'), Q_('4 m')), straight_line(3, 4, 2))
-
-
-def test_point_in_straight_line_two_points_not_in_return_tuple():
-    assert not point_in_curve((Q_('3.1 m'), Q_('3.1 m')), straight_line(3, 4, 2))
 
 
 def test_point_in_straight_line_function():

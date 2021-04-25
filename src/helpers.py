@@ -9,6 +9,7 @@ DB = 'data/data.db'
 
 
 def database_dict(database):
+    """Generates a dictionary of databases from a given SQLite database"""
     with sqlite3.connect(database) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
@@ -23,16 +24,19 @@ def database_dict(database):
 d = database_dict(DB)
 
 
-def interaction_table():
-    names = d['names'].drop(['id', 'name_alt1', 'name_alt2', 'name_alt3'], axis=1)
-    compound = d['compounds'].drop(['name'], axis=1)
-    compound['name'] = names
-    compounds = compound[['id', 'name', 'formula', 'cas', 'molar mass']]
-    compound_table = compounds.style.hide_index()
-    return compound_table
-
-
 def compound_index(compound):
+    """
+    Returns the compound ID in the database
+    Parameters
+    ----------
+    compound : str
+        Compound name / CAS / formula
+
+    Returns
+    -------
+    int
+        compound index in the database
+    """
     compound_name_idx = d['names'].loc[d['names'].isin([compound]).any(axis=1)].index.tolist()
     compound_formula_cas_idx = d['compounds'].loc[d['compounds'].isin([compound]).any(axis=1)].index.tolist()
     try:
@@ -44,6 +48,19 @@ def compound_index(compound):
 
 
 def compound_identification(compound):
+    """
+    Generates the compound identification
+
+    Parameters
+    ----------
+    compound : str
+        Compound name / CAS / formula
+
+    Returns
+    -------
+    namedtuple
+        compound identification parameters
+    """
     compound_idx = compound_index(compound)
     compound_ident_tuple = list(d['compounds'].loc[(d['compounds']['id'] == compound_idx)].itertuples(index=False,
                                                                                                       name=None))[0]
@@ -52,6 +69,18 @@ def compound_identification(compound):
 
 
 def compound_names(compound):
+    """
+    Compound names
+    Parameters
+    ----------
+    compound : str
+        Compound name / CAS / formula
+
+    Returns
+    -------
+    namedtuple
+        compound available names
+    """
     compound_idx = compound_index(compound)
     compound_names_tuple = list(d['names'].loc[(d['names']['id'] == compound_idx)].itertuples(index=False,
                                                                                               name=None))[0]
@@ -60,6 +89,7 @@ def compound_names(compound):
 
 
 def state_index(state):
+    """Return the ID for a given state string"""
     try:
         return d['phys_states'].loc[d['phys_states']['state'] == state, 'id'].item()
     except ValueError:
@@ -67,6 +97,7 @@ def state_index(state):
 
 
 def density_table(compound):
+    """Generates a density dataframe for a given compound"""
     compound_idx = compound_index(compound)
     try:
         return d['density'].loc[(d['density']['id'] == compound_idx)]
@@ -76,6 +107,7 @@ def density_table(compound):
 
 @ureg.wraps('gram/cm**3', [None, None, None])
 def density(compound, state, value_index=0):
+    """Returns the density for a given compound on a given physical state"""
     table = density_table(compound)
     state_idx = state_index(state)
     try:
@@ -85,6 +117,7 @@ def density(compound, state, value_index=0):
 
 
 def antoine_table(compound):
+    """Generates a Antoine coefficients dataframe for a given compound"""
     compound_idx = compound_index(compound)
     try:
         return d['antoine'].loc[(d['antoine']['id'] == compound_idx)]
@@ -93,6 +126,7 @@ def antoine_table(compound):
 
 
 def antoine(compound, value_index=0):
+    """Generates Antoine data for a given compound"""
     table = antoine_table(compound)
     try:
         antoine_tuple = list(table.loc[:, ['t_min', 't_max', 'A', 'B', 'C']].itertuples(index=False,
@@ -104,6 +138,7 @@ def antoine(compound, value_index=0):
 
 
 def point_table(compound, point_name):
+    """Generates dataframe with data for given point for a given compound"""
     compound_idx = compound_index(compound)
     try:
         return d[point_name].loc[d[point_name]['id'] == compound_idx]
@@ -118,12 +153,14 @@ def _point(compound, point_name, value_index=0):
 
 
 def point(compound, point_name, value_index=0):
+    """Returns a point with units"""
     point_with_units = _point(compound, point_name, value_index)
     Point = namedtuple("point", ["temperature", "pressure"])
     return Point(*point_with_units)
 
 
 def enthalpy_table(compound, enthalpy_name):
+    """Generates a enthalpy dataframe for a given compound"""
     compound_idx = compound_index(compound)
     name_dict = {'fusion': 'h_melt',
                  'sublimation': 'h_sub',
@@ -136,17 +173,20 @@ def enthalpy_table(compound, enthalpy_name):
 
 @ureg.wraps('kJ/mole', [None, None, None])
 def enthalpy(compound, enthalpy_name, value_index=0):
+    """Returns the value of an enthalpy for a given compound"""
     table = enthalpy_table(compound, enthalpy_name)
     return list(table.loc[:, 'value'])[value_index]
 
 
 @ureg.wraps(None, ['gram/(cm**3)', 'gram/(cm**3)', 'gram/mol'])
 def volume_change_fusion_calc(density_liquid, density_solid, molar_mass):
+    """Calculates the molar volume change during fusion based on density values"""
     return (1/density_liquid - 1/density_solid) * molar_mass
 
 
 @ureg.wraps('(cm**3)/mole', [None, None, None, None])
 def volume_change_fusion(compound, value_index=0, calc=True, calc_values_index=(0, 0)):
+    """Returns the molar volume change during fusion for a given compound"""
     compound_idx = compound_index(compound)
     if calc:
         d_sol = density(compound, 'solid', calc_values_index[0])

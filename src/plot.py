@@ -1,11 +1,32 @@
 from matplotlib import pyplot as plt
-
 from phase_diagram import ureg
 
 
 class Plot:
     def __init__(self, x_unit, y_unit, x_label='', y_label='', ax=None, scale_log=True, legend=False, title=True,
                  title_text=''):
+        """
+        Parameters
+        ----------
+        x_unit : str
+            pint unit of the independent variable
+        y_unit : str
+            pint unit of the dependent variable
+        x_label : str
+            label of the independent variable
+        y_label : str
+            label of the dependent variable
+        ax : matplotlib axis, optional
+            axis where the plot will be shown. If None, one will be created
+        scale_log : bool, default=True
+            if the y-axis will have a log scale
+        legend : bool, default=False
+            if a legend will be shown
+        title : bool, default=True
+            if the plot will have a title
+        title_text : str, default=''
+            title text
+        """
         self.x_unit = x_unit
         self.y_unit = y_unit
         self.x_label = x_label
@@ -62,6 +83,20 @@ class Plot:
         return self.ax
 
     def plot_arrays(self, tuple_two_arrays, limit=None, label='', **kwargs):
+        """
+        Creates a plot based on two arrays
+
+        Parameters
+        ----------
+        tuple_two_arrays : tuple
+            tuple with two arrays (x array, y array) with pint units
+        limit : float
+            creates a boolean mask in y array, limit y to y< limit
+        label : str
+            label in the legend
+        **kwargs : optional
+            matplotlib arguments
+        """
         x, y = tuple_two_arrays
         try:
             y = y[y < limit]
@@ -72,5 +107,17 @@ class Plot:
         self.plot_customization()
 
     def plot_point(self, tuple_point, label='', **kwargs):
+        """
+        Creates a point in a plot based
+
+        Parameters
+        ----------
+        tuple_point : tuple
+            tuple with two values (x value, y value) with pint units
+        label : str
+            label in the legend
+        **kwargs : optional
+            matplotlib arguments
+        """
         self.ax.scatter(tuple_point[0].to(self.x_unit), tuple_point[1].to(self.y_unit), label=label, **kwargs)
         self.plot_customization()
