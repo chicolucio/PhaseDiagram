@@ -193,6 +193,7 @@ class PhaseDiagram:
         """
         if ax is None:
             fig, ax = plt.subplots(figsize=(10, 8), facecolor=(1.0, 1.0, 1.0))
+        ax.set_axisbelow(True)
 
         if title_text == '':
             title_text = f'Calculated phase diagram - {self.format_formula()}'
@@ -241,6 +242,7 @@ class PhaseDiagram:
         """
         if ax is None:
             fig, ax = plt.subplots(figsize=(10, 8), facecolor=(1.0, 1.0, 1.0))
+            ax.set_axisbelow(True)
 
         graph = Plot(ax=ax, x_label='Temperature', y_label='Pressure', x_unit=T_unit, y_unit=P_unit, legend=legend,
                      scale_log=scale_log, title=title,

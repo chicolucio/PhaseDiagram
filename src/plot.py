@@ -39,6 +39,7 @@ class Plot:
 
         if self.ax is None:
             fig, self.ax = plt.subplots(figsize=(10, 8), facecolor=(1.0, 1.0, 1.0))
+        self.ax.set_axisbelow(True)
 
     def plot_customization(self):
         linewidth = 2
