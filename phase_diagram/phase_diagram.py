@@ -170,7 +170,7 @@ class PhaseDiagram:
         return label_formula
 
     def plot(self, ax=None, T_unit='K', P_unit='Pa', scale_log=True, legend=True, title=True, title_text='',
-             clapeyron_lv=False):
+             clapeyron_lv=False, points=True):
         """
         Plots the phase diagram
 
@@ -192,6 +192,8 @@ class PhaseDiagram:
             title text
         clapeyron_lv : bool, default=False
             if the Clapeyron liquid-vapour curve will be plotted along the Antoine one
+        points: bool, default=True
+            if Triple Point and Critical Point will be shown
         """
         if ax is None:
             fig, ax = plt.subplots(figsize=(10, 8), facecolor=(1.0, 1.0, 1.0))
@@ -212,8 +214,9 @@ class PhaseDiagram:
         if clapeyron_lv:
             graph.plot_arrays(self.clapeyron_lv(), label='Clapeyron L-V', linewidth=linewidth, linestyle='--', zorder=1)
 
-        graph.plot_point(self.triple_point, label='Triple Point', color='red', s=marker_size, zorder=2)
-        graph.plot_point(self.critical_point, label='Critical Point', color='purple', s=marker_size, zorder=2)
+        if points:
+            graph.plot_point(self.triple_point, label='Triple Point', color='red', s=marker_size, zorder=2)
+            graph.plot_point(self.critical_point, label='Critical Point', color='purple', s=marker_size, zorder=2)
 
     @staticmethod
     def plot_custom(curves=None, points=None, ax=None, T_unit='K', P_unit='Pa', scale_log=True, legend=True,
