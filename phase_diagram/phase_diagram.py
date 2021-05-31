@@ -105,6 +105,8 @@ class PhaseDiagram:
         tuple
             Tuple of arrays (temperature, pressure)
         """
+        if self.triple_point.temperature.magnitude - temp_range < 0:
+            temp_range = int(abs(self.triple_point.temperature.magnitude - temp_range))
         T_arr = np.linspace(self.triple_point.temperature.magnitude - temp_range,
                             self.triple_point.temperature.magnitude,
                             self.number_of_points) * ureg.K
