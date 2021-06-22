@@ -11,13 +11,17 @@ Peter Atkins defines in his  book *Physical Chemistry* that "**phase** identifie
 
 # Installation and requirements
 
-This project relies mainly on [SciPy](https://matplotlib.org/), [Matplotlib](https://numpy.org/), [numpy](https://numpy.org/), [Pandas](https://pandas.pydata.org/) and [Pint](https://pint.readthedocs.io/en/stable/).
+This project relies mainly on [Matplotlib](https://www.matplotlib.org/), [SciPy](https://www.scipy.org/), [NumPy](https://numpy.org/), [Pandas](https://pandas.pydata.org/) and [Pint](https://pint.readthedocs.io/en/stable/).
 
 Just clone or download this repo. This is not a package yet. We recommend creating an environment and install the requirements from the `Pipfile` file with [`pipenv`](https://github.com/pypa/pipenv).
 
 # Usage
 
-See the [tutorial](tutorial.ipynb)
+For basic usage see [this tutorial](Tutorial_basico.ipynb).
+
+For plot customization see [this tutorial](Tutorial_graficos_personalizaveis.ipynb).
+
+For interactive plots see [this tutorial](Tutorial_interativo.ipynb).
 
 # Contributing
 
@@ -40,6 +44,10 @@ Feel free to submit issues regarding:
 - commit changes to your own branch
 - push your work back up to your fork
 - submit a pull request so that your changes can be reviewed
+
+# Testing
+
+Tests can be run in the top-level directory with the command `pytest -v tests/`.
 
 # License
 
