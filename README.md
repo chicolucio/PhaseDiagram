@@ -23,6 +23,8 @@ For plot customization see [this tutorial](Tutorial_graficos_personalizaveis.ipy
 
 For interactive plots see [this tutorial](Tutorial_interativo.ipynb).
 
+For an example in Google Colab [click here](https://colab.research.google.com/github/chicolucio/PhaseDiagram/blob/master/Tutorial_interativo_colab.ipynb)
+
 # Contributing
 
 All contributions are welcome.
